@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosita</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    overflow:hidden;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    text-align:center;
+
+    background:linear-gradient(
+        45deg,
+        #ffd6e0,
+        #d6f0ff,
+        #fff0c9,
+        #e7d6ff
+    );
+
+    background-size:400% 400%;
+    animation:bg 10s ease infinite;
+}
+
+@keyframes bg{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+.screen{
+    display:none;
+    width:100%;
+    height:100vh;
+    padding:20px;
+
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+}
+
+.active{
+    display:flex;
+}
+
+img{
+    max-width:300px;
+    max-height:300px;
+    object-fit:contain;
+    border-radius:20px;
+    margin-bottom:20px;
+}
+
+h1{
+    margin-bottom:20px;
+    color:white;
+    text-shadow:2px 2px 10px rgba(0,0,0,0.3);
+}
+
+button{
+    margin:10px;
+    padding:15px 30px;
+    border:none;
+    border-radius:20px;
+    font-size:20px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.yes{
+    background:#7dff9b;
+}
+
+.no{
+    background:#ff7d7d;
+}
+
+.red{
+    color:red;
+    font-size:30px;
+    margin-top:10px;
+}
+
+iframe{
+    width:100%;
+    height:100vh;
+    border:none;
+}
+
+</style>
+</head>
+<body>
+
+<audio id="music" loop>
+    <source src="novemberrain.mp3" type="audio/mpeg">
+</audio>
+
+<div id="app"></div>
+
+<script>
+
+const app = document.getElementById("app");
+
+let noCount = 0;
+
+const screens = [
+
+{
+type:"question",
+image:"imagen1.jpg",
+text:"¿como tamos?",
+options:[
+["iem", true],
+["malito", false]
+]
+},
+
+{
+type:"question",
+image:"imagen2.jpg",
+text:"¿hamebus razonamiento basico... 2+2?",
+options:[
+["4", true],
+["pez", false]
+]
+},
+
+{
+type:"game"
+},
+
+{
+type:"question",
+image:"imagen2.jpg",
+text:"¿tamo raedy?",
+options:[
+["SI", true],
+["Nu", false]
+]
+},
+
+{
+type:"story",
+image:"imagen2.jpg",
+text:"me perdonas pero, no se que decir :V"
+},
+
+{
+type:"story",
+image:"imagen3.jpg",
+text:"oyep, eres una persona muy bkn tipo, igual te conozco hace poco y en vdd eres increíble"
+},
+
+{
+type:"story",
+image:"imagen4.jpg",
+text:"me gusta pasar el tiempito contigo, no se igual somos amigos, pero bue... es que me gustaría contar todas las historias, desde que arrancamos del guardia y subimos el cerro, hasta que nos corrieron los guardias de la plaza"
+},
+
+{
+type:"story",
+image:"imagen5.jpg",
+text:"y ademas es bkn a alguien que le gustan los mismos libros, que a ti"
+},
+
+{
+type:"story",
+image:"imagen6.jpg",
+text:'en fin, como dice el librito "Sé que le caigo bien a la gente, pero imagino que carezco de la facultad de querer a los demás", y bueno... habemus mucho aprecio hacia ti, y se podria decir que me gustas'
+},
+
+{
+type:"story",
+image:"imagen7.jpg",
+text:"para resumir, perdon por hacerte leer tanto, pero queria que quedara claro, porque hace poco... digamos el viernes... como que me asegure de no confundirme con amistad"
+},
+
+{
+type:"story",
+image:"imagen8.jpg",
+text:'un amigo me dijo "dani, dejate de ser wn y dile, sino te vas a seguir matando por dentro..."'
+},
+
+{
+type:"story",
+image:"imagen9.jpg",
+text:"y osea, en el mejor de los casos ahora, es como si demosle..."
+},
+
+{
+type:"story",
+image:"imagen10.jpg",
+text:"muchooo texto, jsanjsna"
+},
+
+{
+type:"finalQuestion"
+},
+
+{
+type:"yes"
+},
+
+{
+type:"no"
+}
+
+];
+
+let current = 0;
+
+function showScreen(index){
+
+    current = index;
+
+    const data = screens[index];
+
+    if(data.type === "question"){
+
+        app.innerHTML = `
+        <div class="screen active">
+            <img src="${data.image}">
+            <h1>${data.text}</h1>
+
+            ${data.options.map((o,i)=>`
+                <button onclick="answer(${o[1]}, '${o[0]}')">
+                    ${o[0]}
+                </button>
+            `).join("")}
+
+            <div id="fail"></div>
+        </div>
+        `;
+    }
+
+    else if(data.type === "game"){
+
+        app.innerHTML = `
+        <iframe src="juego1.html"></iframe>
+        `;
+
+        setTimeout(()=>{
+            showScreen(current + 1);
+        },45000);
+    }
+
+    else if(data.type === "story"){
+
+        app.innerHTML = `
+        <div class="screen active">
+            <img src="${data.image}">
+            <h1>${data.text}</h1>
+        </div>
+        `;
+
+        setTimeout(()=>{
+            showScreen(current + 1);
+        },3000);
+    }
+
+    else if(data.type === "finalQuestion"){
+
+        app.innerHTML = `
+        <div class="screen active">
+
+            <img id="finalImage" src="imagen11.jpg">
+
+            <h1>¿seamos como porco rosso y su hidroavion?</h1>
+
+            <button class="yes" id="yesBtn" onclick="yesAnswer()">
+                si
+            </button>
+
+            <button class="no" id="noBtn" onclick="noAnswer()">
+                no
+            </button>
+
+            <div id="warning"></div>
+
+        </div>
+        `;
+    }
+
+    else if(data.type === "yes"){
+
+        document.getElementById("music").play();
+
+        app.innerHTML = `
+        <div class="screen active">
+            <img src="imagen14.jpg">
+            <h1>TKM &lt;3</h1>
+        </div>
+        `;
+    }
+
+    else if(data.type === "no"){
+
+        document.getElementById("music").play();
+
+        app.innerHTML = `
+        <div class="screen active">
+            <img src="imagen15.jpg">
+            <h1>
+            Esta bien, hasta luego. cualquier cosa me avisa nomas,
+            le llego en 15 min y si estoy de turno hago que alguien llegue en 40.
+            <br><br>
+            toco ser amigos nomas, sino te molesta claro
+            </h1>
+        </div>
+        `;
+    }
+
+}
+
+function answer(correct){
+
+    if(correct){
+
+        showScreen(current + 1);
+
+    }else{
+
+        document.getElementById("fail").innerHTML =
+        "<div class='red'>mal mal mal >:c</div>";
+    }
+}
+
+function yesAnswer(){
+
+    showScreen(14);
+}
+
+function noAnswer(){
+
+    noCount++;
+
+    const warning = document.getElementById("warning");
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const img = document.getElementById("finalImage");
+
+    if(noCount === 1){
+
+        warning.innerHTML = "<div class='red'>segura</div>";
+
+        img.src = "imagen12.jpg";
+
+        setTimeout(()=>{
+            img.src = "imagen11.jpg";
+        },1000);
+
+        noBtn.style.transform = "scale(0.9)";
+        yesBtn.style.transform = "scale(1.2)";
+    }
+
+    else if(noCount === 2){
+
+        warning.innerHTML = "<div class='red'>segura segura</div>";
+
+        img.src = "imagen13.jpg";
+
+        setTimeout(()=>{
+            img.src = "imagen11.jpg";
+        },1000);
+
+        noBtn.style.transform = "scale(0.7)";
+        yesBtn.style.transform = "scale(1.4)";
+    }
+
+    else{
+
+        showScreen(15);
+    }
+}
+
+showScreen(0);
+
+</script>
+
+</body>
+</html>

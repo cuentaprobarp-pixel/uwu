@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dino Runner</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    background:#f7f7f7;
+    font-family:Arial, sans-serif;
+}
+
+.game{
+    width:100%;
+    height:300px;
+    border-bottom:4px solid #333;
+    position:relative;
+    overflow:hidden;
+}
+
+/* DINO */
+
+.dino{
+    width:60px;
+    height:60px;
+    position:absolute;
+    bottom:0;
+    left:50px;
+    background:#333;
+    border-radius:10px;
+}
+
+.jump{
+    animation: jump 0.6s ease;
+}
+
+@keyframes jump{
+    0%{ bottom:0; }
+    50%{ bottom:140px; }
+    100%{ bottom:0; }
+}
+
+/* CACTUS */
+
+.cactus{
+    width:30px;
+    height:60px;
+    position:absolute;
+    bottom:0;
+    right:-50px;
+    background:green;
+    border-radius:5px;
+}
+
+/* SCORE */
+
+.score{
+    position:absolute;
+    top:20px;
+    right:20px;
+    font-size:24px;
+    color:#333;
+}
+
+/* IMAGEN ESPECIAL */
+
+.special-image{
+    position:fixed;
+    width:200px;
+    height:200px;
+    object-fit:contain;
+    z-index:9999;
+    display:none;
+    pointer-events:none;
+}
+
+/* ANIMACION RECORRER */
+
+.run-screen{
+    animation: runScreen 2s linear forwards;
+}
+
+@keyframes runScreen{
+
+    0%{
+        left:-250px;
+        top:50%;
+        transform:translateY(-50%);
+    }
+
+    100%{
+        left:100%;
+        top:50%;
+        transform:translateY(-50%);
+    }
+}
+
+/* IR AL CENTRO + GIRO */
+
+.center-spin{
+    animation: centerSpin 2s ease forwards;
+}
+
+@keyframes centerSpin{
+
+    0%{
+        left:100%;
+        top:50%;
+        transform:translateY(-50%) rotate(0deg) scale(1);
+    }
+
+    100%{
+        left:50%;
+        top:50%;
+        transform:translate(-50%, -50%) rotate(360deg) scale(1.5);
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="score">0</div>
+
+    <div class="dino" id="dino"></div>
+    <div class="cactus" id="cactus"></div>
+
+</div>
+
+<!-- IMAGEN -->
+<img src="imagenjuego.jpg" class="special-image" id="specialImage">
+
+<script>
+
+const dino = document.getElementById('dino');
+const cactus = document.getElementById('cactus');
+const scoreText = document.querySelector('.score');
+const specialImage = document.getElementById('specialImage');
+
+let score = 0;
+let speed = 5;
+let gameRunning = true;
+let animationPlaying = false;
+
+/* SALTO */
+
+function jump(){
+
+    if(dino.classList.contains('jump')) return;
+    if(animationPlaying) return;
+
+    dino.classList.add('jump');
+
+    setTimeout(()=>{
+        dino.classList.remove('jump');
+    },600);
+}
+
+document.addEventListener('keydown',(e)=>{
+    if(e.code === 'Space'){
+        jump();
+    }
+});
+
+document.addEventListener('click',()=>{
+    jump();
+});
+
+/* CACTUS */
+
+let cactusPosition = window.innerWidth;
+
+function moveCactus(){
+
+    if(!gameRunning) return;
+
+    cactusPosition -= speed;
+    cactus.style.left = cactusPosition + 'px';
+
+    if(cactusPosition < -50){
+
+        cactusPosition = window.innerWidth + Math.random()*300;
+
+        score++;
+        scoreText.innerText = score;
+
+        if(score % 5 === 0){
+            speed += 1;
+        }
+    }
+
+    let dinoBottom = parseInt(
+        window.getComputedStyle(dino)
+        .getPropertyValue('bottom')
+    );
+
+    /* COLISION */
+
+    if(
+        cactusPosition > 50 &&
+        cactusPosition < 110 &&
+        dinoBottom < 50 &&
+        !animationPlaying
+    ){
+
+        collisionAnimation();
+        return;
+    }
+
+    requestAnimationFrame(moveCactus);
+}
+
+moveCactus();
+
+/* ANIMACION */
+
+function collisionAnimation(){
+
+    gameRunning = false;
+    animationPlaying = true;
+
+    /* MOSTRAR IMAGEN */
+
+    specialImage.style.display = 'block';
+
+    /* RESET CLASES */
+
+    specialImage.classList.remove('run-screen');
+    specialImage.classList.remove('center-spin');
+
+    /* RECORRER PANTALLA */
+
+    void specialImage.offsetWidth;
+
+    specialImage.classList.add('run-screen');
+
+    /* DESPUES IR AL CENTRO */
+
+    setTimeout(()=>{
+
+        specialImage.classList.remove('run-screen');
+
+        void specialImage.offsetWidth;
+
+        specialImage.classList.add('center-spin');
+
+    },2000);
+
+    /* VOLVER A JUGAR */
+
+    setTimeout(()=>{
+
+        specialImage.style.display = 'none';
+
+        specialImage.classList.remove('center-spin');
+
+        restartGame();
+
+    },4000);
+}
+
+/* REINICIAR */
+
+function restartGame(){
+
+    cactusPosition = window.innerWidth;
+
+    gameRunning = true;
+    animationPlaying = false;
+
+    moveCactus();
+}
+
+</script>
+
+</body>
+</html>
